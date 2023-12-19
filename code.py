@@ -10,7 +10,7 @@ def game_scene():
 
 #setting size for ship and background
     background = stage.Grid(image_bank_background, constants.SCREEN_GRID_X, constants.SCREEN_GRID_Y)
-    ship = stage.Sprite(image_bank_sprites, 5, 75, 66)
+    ship = stage.Sprite(image_bank_sprites, 5, 75, constants.SCREEN_Y -(2 * constants.SPRITE_SIZE))
 
 #setting layers and size of the game 
     game = stage.Stage(ugame.display, constant.FPS)
@@ -44,8 +44,6 @@ def game_scene():
         if keys & ugame.K_DOWN:
             pass
 
-        pass
-
-
+            pass
 if __name__ == "__main__":
     game_scene()
