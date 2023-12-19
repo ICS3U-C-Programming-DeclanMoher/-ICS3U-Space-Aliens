@@ -13,7 +13,7 @@ def game_scene():
     ship = stage.Sprite(image_bank_sprites, 5, 75, constants.SCREEN_Y -(2 * constants.SPRITE_SIZE))
 
 #setting layers and size of the game 
-    game = stage.Stage(ugame.display, constant.FPS)
+    game = stage.Stage(ugame.display, constants.FPS)
     game.layers = [ship] + [background]
 
     #calling to render the game 
@@ -35,10 +35,22 @@ def game_scene():
             pass
         if keys & ugame.K_SELECT:
             pass
+
+#creating borders
         if keys & ugame.K_RIGHT:
-            ship.move(ship.x + 1, ship.y)
+            if ship.x <= constants.SCREEN_X - constants.SPRITE_SIZE:
+                ship.move(ship.x + 1, ship.y)
+        else:
+            pass
+
+#creating borders
         if keys & ugame.K_LEFT:
-            ship.move(ship.x - 1, ship.y)
+            if ship.x >= 0:
+                ship.move(ship.x - 1, ship.y)
+        else:
+            pass
+
+
         if keys & ugame.K_UP:
             pass
         if keys & ugame.K_DOWN:
