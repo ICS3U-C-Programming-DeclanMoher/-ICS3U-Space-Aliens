@@ -2,24 +2,46 @@ import ugame
 import stage 
 
 import constants
+def menu_scene():
+    #importing background from files into 
+    image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
+    
+    #adds text objects
+    text = []
+    text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text1.move(20, 10)
+    text1.text("Mac Game Studios")
+    text.append(text1)
 
+    text2 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text2.move(40, 110)
+    text2.text("PRESS START")
+    text.append(text2)
+
+    #sets the background to image 0 in image bank 
+    background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
+
+
+    #setting layers and size of the game 
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = text + [background]
+
+    #calling to render the game 
+    game.render_block()
+
+    while True:
+        #user inputs and setting buttons to actions
+        keys = ugame.buttons.get_pressed()
+    #updating the every second
+       
+        if keys & ugame.K_START != 0:
+            game_scene()
+    
 def game_scene():
     #importing background from files into 
     image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
     image_bank_sprites = stage.Bank.from_bmp16("space_aliens.bmp")
     
-    #adds text objects
-    text = []
-    text1 = stage.text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text1.move(20, 10)
-    text1.text("MT Game Studios")
-    text.append(text1)
-
-    text2 = stage.text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text2.move(40, 110)
-    text2.text("PRESS START")
-    text.append(text2)
-
     #sets the background to image 0 in image bank 
     background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
     
@@ -121,4 +143,4 @@ def game_scene():
         if keys & ugame.K_DOWN:
             pass
 if __name__ == "__main__":
-    game_scene()
+    menu_scene()
