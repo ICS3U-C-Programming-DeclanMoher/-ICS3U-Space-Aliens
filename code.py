@@ -6,7 +6,7 @@ import constants
 
 def game_scene():
     #importing background from files into 
-    image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
+    image_bank_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
     image_bank_sprites = stage.Bank.from_bmp16("space_aliens.bmp")
     
     #sets the background to image 0 in image bank 
@@ -26,14 +26,24 @@ def game_scene():
 
     #setting size for ship and background
     background = stage.Grid(image_bank_background, constants.SCREEN_GRID_X, constants.SCREEN_GRID_Y)
+    for x_location in range(constants.SCREEN_GRID_X):
+        for y_location in range (constants.SCREEN_GRID_Y):
+            tile_picked = random.randint(1,3)
+            background.tile(x_location,y_location, tile_picked)
     ship = stage.Sprite(image_bank_sprites, 5, 75, constants.SCREEN_Y -(2 * constants.SPRITE_SIZE))
     alien = stage.Sprite(image_bank_sprites, 9,
     int(constants.SCREEN_X / 2 - constants.SPRITE_SIZE / 2),
     16)
 
+    #create lasers for when we shoot
+    lasers = []
+    for laser_number in range(constants.TOTAL_NUMBER_OF_LASERS):
+        a_single_laser = stage.Sprite(image_bank_sprites, 10,constants.OFF_SCREEN_X,constants.OFF_SCREEN_Y)
+        lasers.append(a_single_laser)
+
     #setting layers and size of the game 
     game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = [ship] + [background]
+    game.layers = lasers + [ship] + [alien] + [background]
 
     #calling to render the game 
     game.render_block()
@@ -42,10 +52,6 @@ def game_scene():
         #user inputs and setting buttons to actions
         keys = ugame.buttons.get_pressed()
         
-        #updating the every second
-        game.render_sprites ([ship] + [alien])
-        game.tick()
-
         if keys & ugame.K_O != 0:
             if a_button == constants.button_state["button_up"]:
                 a_button = constants.button_state["button_just_pressed"]
@@ -80,7 +86,18 @@ def game_scene():
                 pass
     #playing pew sound when a button pressed 
         if a_button == constants.button_state["button_just_pressed"]:
-            sound.play(pew_sound)            
+            for laser_number in range(len(lasers)):
+                if lasers[laser_number].x < 0:
+                    lasers[laser_number].move(ship.x, ship.y)
+            sound.play(pew_sound)
+            break
+
+        for laser_number in range(len(lasers)):
+            if lasers[laser_number].x > 0:
+                lasers[laser_number].move(lasers[laser_number].x,lasers[laser_number].y - constants.LASER_SPEED)
+                if lasers[laser_number].y < constants.OFF_TOP_SCREEN:
+                    laser[laser_number].move(constants.OFF_SCREEN_X,constants.OFF_SCREEN_Y)
+
         if keys & ugame.K_X:
             pass
         if keys & ugame.K_O:
@@ -105,7 +122,9 @@ def game_scene():
             pass
         if keys & ugame.K_DOWN:
             pass
-
+#redraw sprites
+        game.render_sprites (lasers + [ship] + [alien])
+        game.tick()
 def splash_scene():
 #splash scene function
 
@@ -113,59 +132,59 @@ def splash_scene():
     image_bank_dumb_background = stage.Bank.from_bmp16("dumb_game_studio.bmp")
 
 
-    #sets the background to image 0 in image bank 
+        #sets the background to image 0 in image bank 
     background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
 
-background.tile(2, 2, 0)  # blank white
+    background.tile(2, 2, 0)  # blank white
 
-background.tile(3, 2, 1)
+    background.tile(3, 2, 1)
 
-background.tile(4, 2, 2)
+    background.tile(4, 2, 2)
 
-background.tile(5, 2, 3)
+    background.tile(5, 2, 3)
 
-background.tile(6, 2, 4)
+    background.tile(6, 2, 4)
 
-background.tile(7, 2, 0)  # blank white
+    background.tile(7, 2, 0)  # blank white
 
-background.tile(2, 3, 0)  # blank white
+    background.tile(2, 3, 0)  # blank white
 
-background.tile(3, 3, 5)
+    background.tile(3, 3, 5)
 
- background.tile(4, 3, 6)
+    background.tile(4, 3, 6)
 
- background.tile(5, 3, 7)
+    background.tile(5, 3, 7)
 
- background.tile(6, 3, 8)
+    background.tile(6, 3, 8)
 
-background.tile(7, 3, 0)  # blank white
-
-
- background.tile(2, 4, 0)  # blank white
-
- background.tile(3, 4, 9)
-
-background.tile(4, 4, 10)
-
- background.tile(5, 4, 11)
-
-background.tile(6, 4, 12)
-
-background.tile(7, 4, 0)  # blank white
+    background.tile(7, 3, 0)  # blank white
 
 
+    background.tile(2, 4, 0)  # blank white
 
-background.tile(2, 5, 0)  # blank white
+    background.tile(3, 4, 9)
 
-background.tile(3, 5, 0)
+    background.tile(4, 4, 10)
 
-background.tile(4, 5, 13)
+    background.tile(5, 4, 11)
 
-background.tile(5, 5, 14)
+    background.tile(6, 4, 12)
 
-background.tile(6, 5, 0)
+    background.tile(7, 4, 0)  # blank white
 
-background.tile(7, 5, 0)  # blank white
+
+
+    background.tile(2, 5, 0)  # blank white
+
+    background.tile(3, 5, 0)
+
+    background.tile(4, 5, 13)
+
+    background.tile(5, 5, 14)
+
+    background.tile(6, 5, 0)
+
+    background.tile(7, 5, 0)  # blank white
 
     #setting layers and size of the game 
     game = stage.Stage(ugame.display, constants.FPS)
@@ -175,9 +194,9 @@ background.tile(7, 5, 0)  # blank white
     game.render_block()
 
     while True:
-       #waits 2 seconds
-       time.sleep(2.0)
-       menu_scene()
+        #waits 2 seconds
+        time.sleep(2.0)
+        menu_scene()
 
 
 def menu_scene():
