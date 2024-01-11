@@ -6,12 +6,17 @@ import constants
 
 def game_scene():
 #this functino is the main game scene
+
+#setting score
+    score = 0
+    
     def show_alien():
         #Moves the alien around the screen
         for alien_number in range(len(aliens)):
             if aliens[alien_number].x < 0:
                 aliens[alien_number].move(random.randint(0 + constants.SPRITE_SIZE,constants.SCREEN_X - constants.SPRITE_SIZE), constants.OFF_TOP_SCREEN)
                 break
+    
 
     #importing background from files into 
     image_bank_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
@@ -23,11 +28,15 @@ def game_scene():
     start_button = constants.button_state["button_up"]
     select_button = constants.button_state["button_up"]
 
-    #get sound ready 
+    #get sounds ready 
     pew_sound = open("pew.wav", 'rb')
+    boom_sound = open("boom.wav", 'rb')
+
+    # create the sound controller
     sound = ugame.audio
     sound.stop()
     sound.mute(False)
+
 
     #setting size for ship and background
     background = stage.Grid(image_bank_background, constants.SCREEN_GRID_X, constants.SCREEN_GRID_Y)
@@ -141,9 +150,28 @@ def game_scene():
                     aliens[alien_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
                     show_alien()
 
+
+        for laser_number in range(len(lasers)):
+            if lasers[laser_number].x > 0:
+                for alien_number in range(len(aliens)):
+                    if aliens[alien_number].x > 0:
+                        if stage.collide(lasers[laser_number].x + 6,lasers[laser_number].y + 2,
+                                        lasers[laser_number].x + 11 ,lasers[laser_number].y + 12,
+                                        aliens[alien_number].x + 1,aliens[alien_number].y,
+                                        aliens[alien_number].x + 15,aliens[alien_number].y + 15):
+
+                            aliens[alien_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
+                            lasers[laser_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
+                            # sound.stop()
+                            # sound.play(boom_sound)
+                            # sound.stop()
+                            show_alien()
+                            show_alien()
+                            score = score + 1
+
 #redraw sprites
-        game.render_sprites (lasers + [ship] + aliens)
-        game.tick()
+    game.render_sprites (lasers + [ship] + aliens)
+    game.tick()
 
 def splash_scene():
 #splash scene function
