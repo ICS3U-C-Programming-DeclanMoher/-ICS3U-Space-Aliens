@@ -3,6 +3,7 @@ import stage
 import time
 import random
 import constants
+import supervisor
 
 def game_scene():
 #this functino is the main game scene
@@ -10,6 +11,13 @@ def game_scene():
 #setting score
     score = 0
     
+    score_text = stage.Text(width=29, height=14)
+    score_text.clear()
+    score_text.cursor(0,0)
+    score_text.move(1,1)
+    score_text.text("Score: {0}".format(score))
+    
+
     def show_alien():
         #Moves the alien around the screen
         for alien_number in range(len(aliens)):
@@ -29,9 +37,10 @@ def game_scene():
     select_button = constants.button_state["button_up"]
 
     #get sounds ready 
-    pew_sound = open("pew.wav", 'rb')
-    boom_sound = open("boom.wav", 'rb')
-
+    honk_sound = open("honk.wav", 'rb')
+    REVERB_sound = open("REVERB.wav", 'rb')
+    coin_sound = open("coin.wav", 'rb')
+    MEOW_sound = open("MEOW.wav", 'rb')
     # create the sound controller
     sound = ugame.audio
     sound.stop()
@@ -48,6 +57,7 @@ def game_scene():
     #create lasers for when we shoot
     ship = stage.Sprite(image_bank_sprites, 5, 75, constants.SCREEN_Y -(2 * constants.SPRITE_SIZE))
 
+#spawning more aliens
     aliens = []
     for alien_number in range(constants.TOTAL_NUMBER_OF_ALIENS):
         a_single_alien = stage.Sprite(image_bank_sprites, 9, constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
@@ -55,13 +65,16 @@ def game_scene():
 
     show_alien()
    
+   #spawning more lasers
     lasers = []
     for laser_number in range(constants.TOTAL_NUMBER_OF_LASERS):
         a_single_laser = stage.Sprite(image_bank_sprites, 10,constants.OFF_SCREEN_X,constants.OFF_SCREEN_Y)
         lasers.append(a_single_laser)
+
+    
     #setting layers and size of the game 
     game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = lasers + [ship] + aliens + [background]
+    game.layers = [score_text] + lasers + [ship] + aliens + [background]
 
     #calling to render the game 
     game.render_block()
@@ -78,7 +91,7 @@ def game_scene():
         else:
             if a_button == constants.button_state["button_still_pressed"]:
                 a_button = constants.button_state["button_released"]
-            else:
+            else: 
                 a_button = constants.button_state["button_up"]
         if keys & ugame.K_X != 0:
             pass
@@ -86,15 +99,17 @@ def game_scene():
             pass
         if keys & ugame.K_SELECT != 0:
             pass
+
+        #moving the ship left and right 
         if keys & ugame.K_RIGHT != 0:
             if ship.x < (constants.SCREEN_X - constants.SPRITE_SIZE):
                 ship.move(ship.x + 1, ship.y)
             else:
-                ship.move((0), ship.y)
+                ship.move(0, ship.y)
 
         if keys & ugame.K_LEFT != 0:
             if ship.x > 0:
-                ship.move((ship.x -constants.SPRITE_MOVEMENT_SPEED), ship.y)
+                ship.move(ship.x -constants.SPRITE_MOVEMENT_SPEED, ship.y)
             else:
                 ship.move(constants.SCREEN_X - constants.SPRITE_SIZE, ship.y)
 
@@ -111,46 +126,42 @@ def game_scene():
             pass
         if keys & ugame.K_SELECT:
             pass
-#creating borders
-        if keys & ugame.K_RIGHT:
-            if ship.x <= constants.SCREEN_X - constants.SPRITE_SIZE:
-                ship.move(ship.x + 1, ship.y)
-        else:
-            pass
-#creating borders
-        if keys & ugame.K_LEFT:
-            if ship.x >= 0:
-                ship.move(ship.x - 1, ship.y)
-        else:
-            pass
         if keys & ugame.K_UP:
             pass
         if keys & ugame.K_DOWN:
             pass
 
-
+            #shooting lasers
         if a_button == constants.button_state["button_just_pressed"]:
             for laser_number in range(len(lasers)):
                 if lasers[laser_number].x < 0:
                     lasers[laser_number].move(ship.x, ship.y)
-                    sound.play(pew_sound)
+                    sound.play(honk_sound)
                     break
 
+            #moving the lasers
         for laser_number in range(len(lasers)):
             if lasers[laser_number].x > 0:
                 lasers[laser_number].move(lasers[laser_number].x, lasers[laser_number].y-constants.LASER_SPEED)
                 if lasers[laser_number].y< constants.OFF_TOP_SCREEN:
                     lasers[laser_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
             
-
+            #moving,hitting and score
         for alien_number in range(len(aliens)):
             if aliens[alien_number].x > 0:
                 aliens[alien_number].move(aliens[alien_number].x, aliens[alien_number].y + constants.ALIEN_SPEED)
                 if aliens[alien_number].y > constants.SCREEN_Y:
                     aliens[alien_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
                     show_alien()
+                    score -= 1
+                    if score < 0:
+                        score = 0
+                    score_text.clear()
+                    score_text.cursor(0,0)
+                    score_text.move(1,1)
+                    score_text.text("Score: {0}".format(score))
 
-
+        #colliding with lasers
         for laser_number in range(len(lasers)):
             if lasers[laser_number].x > 0:
                 for alien_number in range(len(aliens)):
@@ -162,19 +173,41 @@ def game_scene():
 
                             aliens[alien_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
                             lasers[laser_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
-                            # sound.stop()
-                            # sound.play(boom_sound)
-                            # sound.stop()
+                            sound.stop()
+                            sound.play(REVERB_sound)
+                            sound.stop()
                             show_alien()
                             show_alien()
-                            score = score + 1
+                            score += 1
+                            score_text.clear()
+                            score_text.cursor(0,0)
+                            score_text.move(1,1)
+                            score_text.text("Score: {0}".format(score))
+            #die from aliens
+        for alien_number in range(len(aliens)):
+            if aliens[alien_number].x > 0:
+                if stage.collide(aliens[alien_number].x + 1, aliens[alien_number].y,
+                                aliens[alien_number].x + 15, aliens[alien_number].y + 15,
+                                ship.x, ship.y,
+                        ship.x + 15, ship.y + 15):
+                    #alien hit the ship
+                        sound.stop()
+                        sound.play(MEOW_sound)
+                        time.sleep(3)
+                        game_over_scene(score)
 
 #redraw sprites
-    game.render_sprites (lasers + [ship] + aliens)
-    game.tick()
+        game.render_sprites (lasers + [ship] + aliens)
+        game.tick()
 
 def splash_scene():
 #splash scene function
+
+    coin_sound = open("coin.wav", 'rb')
+    sound = ugame.audio
+    sound.stop()
+    sound.mute(False)
+    sound.play(coin_sound)
 
     #importing background from files into code
     image_bank_dumb_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
@@ -283,6 +316,15 @@ def menu_scene():
         if keys & ugame.K_START != 0:
             game_scene()
     
+def game_over_scene(final_score):
+    #this function displays game over scene
+
+    #image background for when game over
+    image_bank_2 = stage.Bank.from_bmp16("")
+
+    
+
+    #turning off the sound
 
 
 
