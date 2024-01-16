@@ -37,14 +37,17 @@ def game_scene():
     select_button = constants.button_state["button_up"]
 
     #get sounds ready 
-    honk_sound = open("honk.wav", 'rb')
-    REVERB_sound = open("REVERB.wav", 'rb')
-    coin_sound = open("coin.wav", 'rb')
-    MEOW_sound = open("MEOW.wav", 'rb')
+    pew2_sound = open("pew2.wav", 'rb')
+    crash_sound = open("crash.wav", 'rb')
+    intro_sound = open("fanfare_x.wav", 'rb')
+    dead_sound = open("hit_with_frying_pan_y.wav", 'rb')
+    bell_sound = open("boxing_bell.wav", 'rb')
     # create the sound controller
     sound = ugame.audio
     sound.stop()
     sound.mute(False)
+
+    sound.play(bell_sound)
 
 
     #setting size for ship and background
@@ -136,7 +139,7 @@ def game_scene():
             for laser_number in range(len(lasers)):
                 if lasers[laser_number].x < 0:
                     lasers[laser_number].move(ship.x, ship.y)
-                    sound.play(honk_sound)
+                    sound.play(pew2_sound)
                     break
 
             #moving the lasers
@@ -173,9 +176,7 @@ def game_scene():
 
                             aliens[alien_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
                             lasers[laser_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
-                            sound.stop()
-                            sound.play(REVERB_sound)
-                            sound.stop()
+                            sound.play(crash_sound)
                             show_alien()
                             show_alien()
                             score += 1
@@ -192,7 +193,7 @@ def game_scene():
                         ship.x + 15, ship.y + 15):
                     #alien hit the ship
                         sound.stop()
-                        sound.play(MEOW_sound)
+                        sound.play(dead_sound)
                         time.sleep(3)
                         game_over_scene(score)
 
@@ -203,11 +204,11 @@ def game_scene():
 def splash_scene():
 #splash scene function
 
-    coin_sound = open("coin.wav", 'rb')
+    intro_sound = open("fanfare_x.wav", 'rb')
     sound = ugame.audio
     sound.stop()
     sound.mute(False)
-    sound.play(coin_sound)
+    sound.play(intro_sound)
 
     #importing background from files into code
     image_bank_dumb_background = stage.Bank.from_bmp16("mt_game_studio.bmp")
@@ -319,14 +320,57 @@ def menu_scene():
 def game_over_scene(final_score):
     #this function displays game over scene
 
+    #turns off sound from game or last scene
+    sound = ugame.audio
+    sound.stop()
+
+    #plays end game sound
+    outro_sound = open("snore_x.wav", 'rb')
+    sound = ugame.audio
+    sound.stop()
+    sound.mute(False)
+    sound.play(outro_sound)
+
     #image background for when game over
-    image_bank_2 = stage.Bank.from_bmp16("")
+    image_bank_2 = stage.Bank.from_bmp16("darksouls.bmp")
 
-    
-
-    #turning off the sound
+    background = stage.Grid(image_bank_2, constants.SCREEN_GRID_X, constants.SCREEN_GRID_Y)
 
 
+    text = []
+    text1 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text1.move(22, 20)
+    text1.text("Final Score: {:0>3d}".format(final_score))
+    text.append(text1)
 
+    text = []
+    text2 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text2.move(43, 60)
+    text2.text("GAME OVER")
+    text.append(text1)
+
+    text3 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text3.move(32, 110)
+    text3.text("PRESS SELECT")
+    text.append(text3)
+
+    # creates a stage for the background to show up with 60FPS
+    game = stage.Stage(ugame.display, constants.FPS)
+    #Sets layers
+    game.layers = text + [background]
+    #rendering background to location of sprite list 
+    game.render_block()
+
+    #repeat forever game loop
+    while True:
+        # get input 
+        keys = ugame.buttons.get_pressed()
+
+        #start button to restart the game 
+        if keys & ugame.K_SELECT != 0:
+            supervisor.reload()
+
+            #updat game logic
+            game.tick()
 if __name__ == "__main__":
     splash_scene()
