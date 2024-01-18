@@ -5,6 +5,70 @@ import random
 import constants
 import supervisor
 
+
+def game_over_scene(final_score):
+    #this function displays game over scene
+
+    #turns off sound from game or last scene
+    sound = ugame.audio
+    sound.stop()
+
+    #plays end game sound
+    outro_sound = open("whah_whah.wav", 'rb')
+    sound = ugame.audio
+    sound.stop()
+    sound.mute(False)
+    sound.play(outro_sound)
+
+    #image background for when game over
+    image_bank_2 = stage.Bank.from_bmp16("darksouls.bmp")
+
+    background = stage.Grid(image_bank_2, constants.SCREEN_GRID_X, constants.SCREEN_GRID_Y)
+
+
+    text = []
+    text1 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text1.move(22, 20)
+    text1.text("Final Score: {:0>3d}".format(final_score))
+    text.append(text1)
+
+   
+    text2 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text2.move(43, 60)
+    text2.text("GAME OVER")
+    text.append(text2)
+
+    text3 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text3.move(32, 110)
+    text3.text("PRESS SELECT")
+    text.append(text3)
+
+    # creates a stage for the background to show up with 60FPS
+    game = stage.Stage(ugame.display, constants.FPS)
+    #Sets layers
+    game.layers = text + [background]
+    #rendering background to location of sprite list 
+    game.render_block()
+
+    #repeat forever game loop
+    while True:
+        # get input 
+        keys = ugame.buttons.get_pressed()
+
+        #start button to restart the game 
+        if keys & ugame.K_SELECT != 0:
+            restart_sound = open("fault2.wav", 'rb')
+            sound = ugame.audio
+            sound.stop()
+            sound.mute(False)
+            sound.play(restart_sound)
+            time.sleep(2.5)
+            supervisor.reload()
+            
+
+            #update game logic
+            game.tick()
+
 def game_scene():
 #this functino is the main game scene
 
@@ -37,10 +101,10 @@ def game_scene():
     select_button = constants.button_state["button_up"]
 
     #get sounds ready 
-    pew2_sound = open("pew2.wav", 'rb')
+    pew_sound = open("blaster.wav", 'rb')
     crash_sound = open("crash.wav", 'rb')
     intro_sound = open("fanfare_x.wav", 'rb')
-    dead_sound = open("hit_with_frying_pan_y.wav", 'rb')
+    dead_sound = open("bomb_x.wav", 'rb')
     bell_sound = open("boxing_bell.wav", 'rb')
     # create the sound controller
     sound = ugame.audio
@@ -86,6 +150,10 @@ def game_scene():
         #user inputs and setting buttons to actions
         keys = ugame.buttons.get_pressed()
         
+        #if score is = 20 call win scene
+        # if score == 1:
+        #     win_scene()
+
         if keys & ugame.K_O != 0:
             if a_button == constants.button_state["button_up"]:
                 a_button = constants.button_state["button_just_pressed"]
@@ -116,30 +184,12 @@ def game_scene():
             else:
                 ship.move(constants.SCREEN_X - constants.SPRITE_SIZE, ship.y)
 
-        if keys & ugame.K_UP != 0:
-            pass
-        if keys & ugame.K_DOWN != 0:
-            pass
-
-        if keys & ugame.K_X:
-            pass
-        if keys & ugame.K_O:
-            pass
-        if keys & ugame.K_START:
-            pass
-        if keys & ugame.K_SELECT:
-            pass
-        if keys & ugame.K_UP:
-            pass
-        if keys & ugame.K_DOWN:
-            pass
-
             #shooting lasers
         if a_button == constants.button_state["button_just_pressed"]:
             for laser_number in range(len(lasers)):
                 if lasers[laser_number].x < 0:
                     lasers[laser_number].move(ship.x, ship.y)
-                    sound.play(pew2_sound)
+                    sound.play(pew_sound)
                     break
 
             #moving the lasers
@@ -197,9 +247,140 @@ def game_scene():
                         time.sleep(3)
                         game_over_scene(score)
 
+        
+
 #redraw sprites
         game.render_sprites (lasers + [ship] + aliens)
         game.tick()
+
+# def win_scene():
+#     #importing background from files into 
+#     image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
+    
+#     #adds text objects
+#     text = []
+#     text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+#     text1.move(20, 10)
+#     text1.text("WINNER")
+#     text.append(text1)
+
+#     text2 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+#     text2.move(40, 110)
+#     text2.text("You got the score of 20")
+#     text.append(text2)
+
+#     #sets the background to image 0 in image bank 
+#     background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
+
+
+#     #setting layers and size of the game 
+#     game = stage.Stage(ugame.display, constants.FPS)
+#     game.layers = text + [background]
+
+#     #calling to render the game 
+#     game.render_block()
+
+#     while True:
+#         #user inputs and setting buttons to actions
+#         keys = ugame.buttons.get_pressed()
+    
+        
+#        # if start/select is pressed it will call the respective functions
+#         if keys & ugame.K_START != 0:
+#             game_scene()
+
+#         game.tick()
+
+def instructions_scene():
+    #importing background from files into 
+    image_bank_background = stage.Bank.from_bmp16("darksouls.bmp")
+    
+    #adds text objects
+    text = []
+    text1 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text1.move(10, 20)
+    text1.text("PRESS {A} TO FIRE")
+    text.append(text1)
+
+   
+    text2 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text2.move(10, 60)
+    text2.text("D-PAD TO MOVE")
+    text.append(text2)
+
+    text3 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text3.move(10, 110)
+    text3.text("PRESS START")
+    text.append(text3)
+
+    #sets the background to image 0 in image bank 
+    background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
+
+
+    #setting layers and size of the game 
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = text + [background]
+
+    #calling to render the game 
+    game.render_block()
+
+    while True:
+        #user inputs and setting buttons to actions
+        keys = ugame.buttons.get_pressed()
+    
+        
+        # if start/select is pressed it will call the respective functions
+        if keys & ugame.K_START != 0:
+            game_scene()
+
+           #update game logic
+        game.tick()
+
+
+
+
+def menu_scene():
+    #importing background from files into 
+    image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
+    
+    #adds text objects
+    text = []
+    text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text1.move(20, 10)
+    text1.text("Mac Game Studios")
+    text.append(text1)
+
+    text2 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text2.move(40, 110)
+    text2.text("PRESS START")
+    text.append(text2)
+
+    #sets the background to image 0 in image bank 
+    background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
+
+
+    #setting layers and size of the game 
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = text + [background]
+
+    #calling to render the game 
+    game.render_block()
+
+    while True:
+        #user inputs and setting buttons to actions
+        keys = ugame.buttons.get_pressed()
+    
+        
+       # if start/select is pressed it will call the respective functions
+        if keys & ugame.K_START != 0:
+            game_scene()
+        if keys & ugame.K_X != 0:
+            instructions_scene()
+
+
+
+    
+
 
 def splash_scene():
 #splash scene function
@@ -279,98 +460,6 @@ def splash_scene():
         #waits 2 seconds
         time.sleep(2.0)
         menu_scene()
-
-
-def menu_scene():
-    #importing background from files into 
-    image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
-    
-    #adds text objects
-    text = []
-    text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text1.move(20, 10)
-    text1.text("Mac Game Studios")
-    text.append(text1)
-
-    text2 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text2.move(40, 110)
-    text2.text("PRESS START")
-    text.append(text2)
-
-    #sets the background to image 0 in image bank 
-    background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
-
-
-    #setting layers and size of the game 
-    game = stage.Stage(ugame.display, constants.FPS)
-    game.layers = text + [background]
-
-    #calling to render the game 
-    game.render_block()
-
-    while True:
-        #user inputs and setting buttons to actions
-        keys = ugame.buttons.get_pressed()
-    
-        #updating the every second
-       
-        if keys & ugame.K_START != 0:
-            game_scene()
-    
-def game_over_scene(final_score):
-    #this function displays game over scene
-
-    #turns off sound from game or last scene
-    sound = ugame.audio
-    sound.stop()
-
-    #plays end game sound
-    outro_sound = open("snore_x.wav", 'rb')
-    sound = ugame.audio
-    sound.stop()
-    sound.mute(False)
-    sound.play(outro_sound)
-
-    #image background for when game over
-    image_bank_2 = stage.Bank.from_bmp16("darksouls.bmp")
-
-    background = stage.Grid(image_bank_2, constants.SCREEN_GRID_X, constants.SCREEN_GRID_Y)
-
-
-    text = []
-    text1 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text1.move(22, 20)
-    text1.text("Final Score: {:0>3d}".format(final_score))
-    text.append(text1)
-
-    text = []
-    text2 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text2.move(43, 60)
-    text2.text("GAME OVER")
-    text.append(text1)
-
-    text3 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
-    text3.move(32, 110)
-    text3.text("PRESS SELECT")
-    text.append(text3)
-
-    # creates a stage for the background to show up with 60FPS
-    game = stage.Stage(ugame.display, constants.FPS)
-    #Sets layers
-    game.layers = text + [background]
-    #rendering background to location of sprite list 
-    game.render_block()
-
-    #repeat forever game loop
-    while True:
-        # get input 
-        keys = ugame.buttons.get_pressed()
-
-        #start button to restart the game 
-        if keys & ugame.K_SELECT != 0:
-            supervisor.reload()
-
-            #updat game logic
-            game.tick()
+        
 if __name__ == "__main__":
     splash_scene()
