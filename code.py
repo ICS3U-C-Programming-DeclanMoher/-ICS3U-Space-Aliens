@@ -5,7 +5,8 @@ import random
 import constants
 import supervisor
 
-
+global_sound = False
+# score = 0
 def game_over_scene(final_score):
     #this function displays game over scene
 
@@ -17,7 +18,6 @@ def game_over_scene(final_score):
     outro_sound = open("whah_whah.wav", 'rb')
     sound = ugame.audio
     sound.stop()
-    sound.mute(False)
     sound.play(outro_sound)
 
     #image background for when game over
@@ -102,7 +102,7 @@ def game_scene():
 
     #get sounds ready 
     pew_sound = open("blaster.wav", 'rb')
-    crash_sound = open("crash.wav", 'rb')
+    crash_sound = open("bloop_x.wav", 'rb')
     intro_sound = open("fanfare_x.wav", 'rb')
     dead_sound = open("bomb_x.wav", 'rb')
     bell_sound = open("boxing_bell.wav", 'rb')
@@ -150,9 +150,24 @@ def game_scene():
         #user inputs and setting buttons to actions
         keys = ugame.buttons.get_pressed()
         
-        #if score is = 20 call win scene
-        # if score == 1:
-        #     win_scene()
+        #mutting all sounds
+        if keys & ugame.K_SELECT != 0:
+            sound = ugame.audio
+            sound.stop()
+            sound.mute(True)
+        
+        #unmuting sounds
+        if keys & ugame.K_UP != 0:
+            sound = ugame.audio
+            sound.stop()
+            sound.mute(False)
+            
+        
+        # if score is = 20 call win scene
+
+        if score == 10:
+            win_scene()
+            
 
         if keys & ugame.K_O != 0:
             if a_button == constants.button_state["button_up"]:
@@ -174,13 +189,13 @@ def game_scene():
         #moving the ship left and right 
         if keys & ugame.K_RIGHT != 0:
             if ship.x < (constants.SCREEN_X - constants.SPRITE_SIZE):
-                ship.move(ship.x + 1, ship.y)
+                ship.move(ship.x + constants.SHIP_SPEED, ship.y)
             else:
                 ship.move(0, ship.y)
 
         if keys & ugame.K_LEFT != 0:
             if ship.x > 0:
-                ship.move(ship.x -constants.SPRITE_MOVEMENT_SPEED, ship.y)
+                ship.move(ship.x - constants.SHIP_SPEED, ship.y)
             else:
                 ship.move(constants.SCREEN_X - constants.SPRITE_SIZE, ship.y)
 
@@ -220,9 +235,9 @@ def game_scene():
                 for alien_number in range(len(aliens)):
                     if aliens[alien_number].x > 0:
                         if stage.collide(lasers[laser_number].x + 6,lasers[laser_number].y + 2,
-                                        lasers[laser_number].x + 11 ,lasers[laser_number].y + 12,
-                                        aliens[alien_number].x + 1,aliens[alien_number].y,
-                                        aliens[alien_number].x + 15,aliens[alien_number].y + 15):
+                                        lasers[laser_number].x + 11,lasers[laser_number].y + 12,
+                                        aliens[alien_number].x - 1,aliens[alien_number].y,
+                                        aliens[alien_number].x + 10,aliens[alien_number].y + 10):
 
                             aliens[alien_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
                             lasers[laser_number].move(constants.OFF_SCREEN_X, constants.OFF_SCREEN_Y)
@@ -237,10 +252,10 @@ def game_scene():
             #die from aliens
         for alien_number in range(len(aliens)):
             if aliens[alien_number].x > 0:
-                if stage.collide(aliens[alien_number].x + 1, aliens[alien_number].y,
-                                aliens[alien_number].x + 15, aliens[alien_number].y + 15,
+                if stage.collide(aliens[alien_number].x - 1, aliens[alien_number].y - 2,
+                                aliens[alien_number].x + 10, aliens[alien_number].y + 10,
                                 ship.x, ship.y,
-                        ship.x + 15, ship.y + 15):
+                        ship.x + 10, ship.y + 10):
                     #alien hit the ship
                         sound.stop()
                         sound.play(dead_sound)
@@ -253,43 +268,49 @@ def game_scene():
         game.render_sprites (lasers + [ship] + aliens)
         game.tick()
 
-# def win_scene():
-#     #importing background from files into 
-#     image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
+def win_scene():
+    #importing background from files into 
+    image_bank_background = stage.Bank.from_bmp16("space_aliens_background.bmp")
     
-#     #adds text objects
-#     text = []
-#     text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
-#     text1.move(20, 10)
-#     text1.text("WINNER")
-#     text.append(text1)
+    #adds text objects
+    text = []
+    text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text1.move(20, 10)
+    text1.text("WINNER")
+    text.append(text1)
 
-#     text2 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
-#     text2.move(40, 110)
-#     text2.text("You got the score of 20")
-#     text.append(text2)
+    text2 = stage.Text(width=29, height=14, font=None, palette=constants.RED_PALETTE, buffer=None)
+    text2.move(10, 60)
+    text2.text("PRESS SELECT")
+    text.append(text2)
 
-#     #sets the background to image 0 in image bank 
-#     background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
+    #sets the background to image 0 in image bank 
+    background = stage.Grid(image_bank_background, constants.SCREEN_X,constants.SCREEN_Y)
 
 
-#     #setting layers and size of the game 
-#     game = stage.Stage(ugame.display, constants.FPS)
-#     game.layers = text + [background]
+    #setting layers and size of the game 
+    game = stage.Stage(ugame.display, constants.FPS)
+    game.layers = text + [background]
 
-#     #calling to render the game 
-#     game.render_block()
+    #calling to render the game 
+    game.render_block()
 
-#     while True:
-#         #user inputs and setting buttons to actions
-#         keys = ugame.buttons.get_pressed()
+    while True:
+        #user inputs and setting buttons to actions
+        keys = ugame.buttons.get_pressed()
     
         
-#        # if start/select is pressed it will call the respective functions
-#         if keys & ugame.K_START != 0:
-#             game_scene()
+       # if start/select is pressed it will call the respective functions
+        if keys & ugame.K_SELECT != 0:
+            win_sound = open("cowabunga.wav", 'rb')
+            sound = ugame.audio
+            sound.stop()
+            sound.mute(False)
+            sound.play(win_sound)
+            time.sleep(2.5)
+            supervisor.reload()
 
-#         game.tick()
+        game.tick()
 
 def instructions_scene():
     #importing background from files into 
@@ -347,7 +368,7 @@ def menu_scene():
     text = []
     text1 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
     text1.move(20, 10)
-    text1.text("Mac Game Studios")
+    text1.text("DM Studios")
     text.append(text1)
 
     text2 = stage.Text(width=29, height=12, font=None, palette=constants.RED_PALETTE, buffer=None)
@@ -383,8 +404,7 @@ def menu_scene():
 
 
 def splash_scene():
-#splash scene function
-
+    #splash scene function
     intro_sound = open("fanfare_x.wav", 'rb')
     sound = ugame.audio
     sound.stop()
